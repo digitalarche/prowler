@@ -14,7 +14,11 @@ CHECK_ID_extra737="7.37"
 CHECK_TITLE_extra737="[extra737] Check KMS keys with key rotation disabled (Not Scored) (Not part of CIS benchmark)"
 CHECK_SCORED_extra737="NOT_SCORED"
 CHECK_TYPE_extra737="EXTRA"
+CHECK_SEVERITY_extra737="Medium"
+CHECK_ASFF_RESOURCE_TYPE_extra737="AwsKmsKey"
 CHECK_ALTERNATE_check737="extra737"
+CHECK_ASFF_COMPLIANCE_TYPE_extra737="ens-op.exp.11.aws.kms.3"
+CHECK_SERVICENAME_extra737="kms"
 
 extra737(){
   textInfo "Looking for KMS keys in all regions...  "
@@ -23,7 +27,10 @@ extra737(){
     if [[ $LIST_OF_CUSTOMER_KMS_KEYS ]];then
       for key in $LIST_OF_CUSTOMER_KMS_KEYS; do
         CHECK_ROTATION=$($AWSCLI kms get-key-rotation-status --key-id $key $PROFILE_OPT --region $regx  --output text)
-        if [[ $CHECK_ROTATION == "False" ]]; then
+        CHECK_STATUS=$($AWSCLI kms describe-key --key-id $key $PROFILE_OPT --region $regx --output json | jq -r '.KeyMetadata.KeyState')
+        if [[ $CHECK_STATUS == "PendingDeletion" ]]; then
+          textInfo "$regx: KMS key $key is pending deletion and cannot be rotated" "$regx"
+        elif [[ $CHECK_ROTATION == "False" ]]; then
           textFail "$regx: KMS key $key has rotation disabled!" "$regx"
         else
           textPass "$regx: KMS key $key has rotation enabled" "$regx"

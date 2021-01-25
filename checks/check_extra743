@@ -14,7 +14,10 @@ CHECK_ID_extra743="7.43"
 CHECK_TITLE_extra743="[extra743] Check if API Gateway has client certificate enabled to access your backend endpoint (Not Scored) (Not part of CIS benchmark)"
 CHECK_SCORED_extra743="NOT_SCORED"
 CHECK_TYPE_extra743="EXTRA"
+CHECK_SEVERITY_extra743="Medium"
+CHECK_ASFF_RESOURCE_TYPE_extra743="AwsApiGatewayRestApi"
 CHECK_ALTERNATE_check743="extra743"
+CHECK_SERVICENAME_extra743="apigateway"
 
 extra743(){
   for regx in $REGIONS; do
@@ -23,15 +26,15 @@ extra743(){
       for api in $LIST_OF_REST_APIS; do
         API_GW_NAME=$($AWSCLI apigateway get-rest-apis $PROFILE_OPT --region $regx --query "items[?id==\`$api\`].name" --output text)
         LIST_OF_STAGES=$($AWSCLI $PROFILE_OPT --region $regx apigateway get-stages --rest-api-id $api --query 'item[*].stageName' --output text)
-        if [[ $LIST_OF_STAGES ]]; then 
+        if [[ $LIST_OF_STAGES ]]; then
           for stage in $LIST_OF_STAGES; do
             CHECK_CERTIFICATE=$($AWSCLI $PROFILE_OPT --region $regx apigateway get-stages --rest-api-id $api --query "item[?stageName==\`$stage\`].clientCertificateId" --output text)
             if [[ $CHECK_CERTIFICATE ]]; then
                 textPass "$regx: API Gateway $API_GW_NAME ID $api in $stage has client certificate enabled" "$regx"
-              else 
+              else
                 textFail "$regx: API Gateway $API_GW_NAME ID $api in $stage has not client certificate enabled" "$regx"
-            fi 
-          done 
+            fi
+          done
         fi
       done
     else

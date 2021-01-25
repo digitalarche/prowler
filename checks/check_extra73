@@ -11,13 +11,16 @@
 # CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-CHECK_ID_extra73="7.3,7.03"
+CHECK_ID_extra73="7.3"
 CHECK_TITLE_extra73="[extra73] Ensure there are no S3 buckets open to the Everyone or Any AWS user (Not Scored) (Not part of CIS benchmark)"
 CHECK_SCORED_extra73="NOT_SCORED"
 CHECK_TYPE_extra73="EXTRA"
+CHECK_SEVERITY_extra73="Critical"
+CHECK_ASFF_RESOURCE_TYPE_extra73="AwsS3Bucket"
 CHECK_ALTERNATE_extra703="extra73"
 CHECK_ALTERNATE_check73="extra73"
 CHECK_ALTERNATE_check703="extra73"
+CHECK_SERVICENAME_check73="s3"
 
 # Verified with AWS support that if get-bucket-acl doesn't return a grant
 # for All and get-bucket-policy-status returns IsPublic false or bad request
@@ -43,7 +46,7 @@ extra73(){
   #
   ACCOUNT_PUBLIC_ACCESS_BLOCK=$($AWSCLI s3control get-public-access-block $PROFILE_OPT --region $REGION --account-id $ACCOUNT_NUM --output json 2>&1)
   if [[ $(echo "$ACCOUNT_PUBLIC_ACCESS_BLOCK" | grep AccessDenied) ]]; then
-    textFail "Access Denied Trying to Get Public Access Block for $bucket"
+    textFail "Access Denied getting PublicAccessBlock configuration for AWS account"
     return
   fi
   if [[ $(echo "$ACCOUNT_PUBLIC_ACCESS_BLOCK" | grep NoSuchPublicAccessBlockConfiguration) ]]; then
@@ -78,18 +81,17 @@ extra73(){
     # must be made to S3 endpoints in the same region as the bucket was
     # created.
     #
-    BUCKET_LOCATION=$($AWSCLI s3api get-bucket-location --bucket $bucket $PROFILE_OPT --output text 2>&1)
+    BUCKET_LOCATION=$($AWSCLI s3api get-bucket-location $PROFILE_OPT --region $REGION --bucket $bucket --output text 2>&1)
     if [[ $(echo "$BUCKET_LOCATION" | grep AccessDenied) ]]; then
       textFail "Access Denied Trying to Get Bucket Location for $bucket"
       continue
     fi
-    if [[ "None" == $BUCKET_LOCATION ]]; then
+    if [[ $BUCKET_LOCATION == "None" ]]; then
       BUCKET_LOCATION="us-east-1"
     fi
-    if [[ "EU" == $BUCKET_LOCATION ]]; then
+    if [[ $BUCKET_LOCATION == "EU" ]]; then
       BUCKET_LOCATION="eu-west-1"
     fi
-
     #
     # If public ACLs disabled at bucket level then look no further
     #

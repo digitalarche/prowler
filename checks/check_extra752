@@ -14,7 +14,11 @@ CHECK_ID_extra752="7.52"
 CHECK_TITLE_extra752="[extra752] Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to Redis port 6379 (Not Scored) (Not part of CIS benchmark)"
 CHECK_SCORED_extra752="NOT_SCORED"
 CHECK_TYPE_extra752="EXTRA"
+CHECK_SEVERITY_extra752="High"
+CHECK_ASFF_RESOURCE_TYPE_extra752="AwsEc2SecurityGroup"
 CHECK_ALTERNATE_check752="extra752"
+CHECK_ASFF_COMPLIANCE_TYPE_extra752="ens-mp.com.4.aws.sg.9"
+CHECK_SERVICENAME_extra752="ec2"
 
 extra752(){
   for regx in $REGIONS; do

@@ -11,13 +11,15 @@
 # CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-CHECK_ID_extra77="7.7,7.07"
+CHECK_ID_extra77="7.7"
 CHECK_TITLE_extra77="[extra77] Ensure there are no ECR repositories set as Public (Not Scored) (Not part of CIS benchmark)"
 CHECK_SCORED_extra77="NOT_SCORED"
 CHECK_TYPE_extra77="EXTRA"
+CHECK_SEVERITY_extra77="Critical"
 CHECK_ALTERNATE_extra707="extra77"
 CHECK_ALTERNATE_check77="extra77"
 CHECK_ALTERNATE_check707="extra77"
+CHECK_SERVICENAME_extra77="ecr"
 
 extra77(){
   # "Ensure there are no ECR repositories set as Public (Not Scored) (Not part of CIS benchmark)"
@@ -25,6 +27,10 @@ extra77(){
     LIST_ECR_REPOS=$($AWSCLI ecr describe-repositories $PROFILE_OPT --region $region --query "repositories[*].[repositoryName]" --output text 2>&1)
     if [[ $(echo "$LIST_ECR_REPOS" | grep AccessDenied) ]]; then
       textFail "Access Denied Trying to describe ECR repositories"
+      continue
+    fi
+    if [[ $(echo "$LIST_ECR_REPOS" | grep SubscriptionRequiredException) ]]; then
+      textFail "Subscription Required Exception trying to describe ECR repositories"
       continue
     fi
     if [[ ! -z "$LIST_ECR_REPOS" ]]; then
